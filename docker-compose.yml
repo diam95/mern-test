@@ -1,0 +1,55 @@
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: ./mern-test-backend
+      dockerfile: Dockerfile
+    image: myapp-server
+    container_name: myapp-node-server
+    command: node server.js
+    volumes:
+      - ./server/:/usr/app
+      - /usr/app/node_modules
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mongo
+    environment:
+      - NODE_ENV=development
+    networks:
+      - dockernet
+  mongo:
+    image: mongo
+    volumes:
+      - data-volume:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - dockernet
+  client:
+    build:
+      context: ./mern-test-frontend
+      dockerfile: Dockerfile
+    image: myapp-client
+    container_name: myapp-react-client
+    command: npm start
+    volumes:
+      - ./client/:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
+    networks:
+      - dockernet
+
+networks:
+  dockernet:
+    external: true
+
+volumes:
+  data-volume:
+  node_modules:
+  web-root:
+    driver: local
